@@ -8,6 +8,7 @@ import base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from .base import BaseHandler
+from .crypto import encrypt_display_name
 
 AES_KEY = AESGCM.generate_key(bit_lenght=256) #generate AES key
 
@@ -73,13 +74,13 @@ class RegistrationHandler(BaseHandler):
             'email': email,
             'password': password,
             'displayName': display_name
-            'hasDisability': has_disability
+            'hasdisability': has_disability
         })
 
         self.set_status(200)
         self.response['email'] = email
         self.response['displayName'] = display_name
-        self.response['hasDisability'] = has_disability
+        self.response['hasdisability'] = has_disability
         
 
         self.write_json()
