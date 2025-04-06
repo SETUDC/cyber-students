@@ -17,6 +17,7 @@ class AuthHandler(BaseHandler):
             token = self.request.headers.get('X-Token')
             if not token:
               raise Exception()
+              
         except:
             self.current_user = None
             self.send_error(400, message='You must provide a token!')
@@ -39,6 +40,13 @@ class AuthHandler(BaseHandler):
         if current_time > user['expiresIn']:
             self.current_user = None
             self.send_error(403, message='Your token has expired!')
+            return
+            
+        try:
+            decrypted_display_name = decrypt_display_name(user['displayName'])
+        except Exception:
+            self.current_user = None
+            self.send_error(500, message='Could not decrypt display name!')
             return
 
         self.current_user = {
