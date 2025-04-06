@@ -40,7 +40,7 @@ class LoginHandler(BaseHandler):
             password = body['password']
             if not isinstance(password, str):
                 raise Exception()
-        except:
+        except Exception:
             self.send_error(400, message='You must provide an email address and password!')
             return
 
