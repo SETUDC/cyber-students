@@ -61,6 +61,10 @@ class RegistrationHandler(BaseHandler):
         if not display_name:
             self.send_error(400, message='The display name is invalid!')
             return
+            
+        if not has_disability:
+            self.send_error(400, message='Yes or No')
+            return
 
         user = yield self.db.users.find_one({
           'email': email
