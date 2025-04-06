@@ -13,11 +13,11 @@ from .encrypt_decrypt import encrypt_display_name
 
 AES_KEY = AESGCM.generate_key(bit_length=256) #generate AES key
 
-def encrypt_display_name(name: str, key:bytes):
+def encrypt_display_name(name: str, key:bytes) -> str:
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)
     ciphertext = aesgcm.encrypt(nonce, name.encode('utf-8'), None)
-    return base64.b4encode(nonce + ciphertext).decode('utf-8')
+    return base64.b64encode(nonce + ciphertext).decode('utf-8')
     
 class RegistrationHandler(BaseHandler):
     
@@ -45,7 +45,9 @@ class RegistrationHandler(BaseHandler):
             if not isinstance(has_disability, bool):
                 raise Exception()
                 
-            encrypted_display_name = encrypt_display_name(display_name, AES-KEY)
+            encrypted_display_name = encrypt_display_name(display_name, AES_KEY)
+            
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             
         except Exception as e:
             self.send_error(400, message='You must provide an email address, password and display name!')
