@@ -3,8 +3,11 @@ from time import mktime
 from tornado.escape import json_decode, utf8
 from tornado.gen import coroutine
 from uuid import uuid4
+import bcrypt   # for hashing
 
 from .base import BaseHandler
+from .encrypt_decrypt import decrypt_display_name
+
 
 class LoginHandler(BaseHandler):
 
@@ -52,21 +55,34 @@ class LoginHandler(BaseHandler):
         user = yield self.db.users.find_one({
           'email': email
         }, {
-          'password': 1
+          'password': 1,
+          'display_Name': 1
         })
 
         if user is None:
             self.send_error(403, message='The email address and password are invalid!')
             return
-
-        if user['password'] != password:
+            
+        if not user.get('password'):
             self.send_error(403, message='The email address and password are invalid!')
             return
-
-        token = yield self.generate_token(email)
+            
+        if not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+            self.send_error(403, message='The email address and password are invalid!')
+            return
+            
+        try:
+            decrypted_display_name = decrypt_display_name(user['display_Name', ''])   #decrupt display name
+        except Exception:
+            decrypted_display_name = '[decryption not successful]'
+            
+        token = yield self.generate_token(email) 
 
         self.set_status(200)
         self.response['token'] = token['token']
         self.response['expiresIn'] = token['expiresIn']
+        self.response['displayName'] = decrypted_display_name
 
         self.write_json()
+
+   

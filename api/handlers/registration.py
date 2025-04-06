@@ -6,17 +6,18 @@ from tornado.gen import coroutine
 import os
 import base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+import bcrypt
 
 from .base import BaseHandler
-from .crypto import encrypt_display_name
+from .encrypt_decrypt import encrypt_display_name
 
-AES_KEY = AESGCM.generate_key(bit_lenght=256) #generate AES key
+AES_KEY = AESGCM.generate_key(bit_length=256) #generate AES key
 
 def encrypt_display_name(name: str, key:bytes):
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)
     ciphertext = aesgcm.encrypt(nonce, name.encode('utf-8'), None)
-    return base64.bg4encode(nonce + ciphertext).decode('utf-8')
+    return base64.b4encode(nonce + ciphertext).decode('utf-8')
     
 class RegistrationHandler(BaseHandler):
     
@@ -40,7 +41,7 @@ class RegistrationHandler(BaseHandler):
             if not isinstance(display_name, str):
                 raise Exception()
                 
-            has_disability = body.get('Disability')
+            has_disability = body.get('hasDisability')
             if not isinstance(has_disability, bool):
                 raise Exception()
                 
@@ -74,17 +75,17 @@ class RegistrationHandler(BaseHandler):
             self.send_error(409, message='A user with the given email address already exists!')
             return
 
-        yield self.db.users.insert_one({
+        yield self.db.users.insert_one ({
             'email': email,
-            'password': password,
-            'displayName': display_name
-            'hasdisability': has_disability
+            'password': hashed_password,
+            'displayName': encrypted_display_name,
+            'hasDisability': has_disability
         })
 
         self.set_status(200)
         self.response['email'] = email
         self.response['displayName'] = display_name
-        self.response['hasdisability'] = has_disability
+        self.response['hasDisability'] = has_disability
         
 
         self.write_json()
