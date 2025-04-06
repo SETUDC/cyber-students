@@ -56,7 +56,7 @@ class LoginHandler(BaseHandler):
           'email': email
         }, {
           'password': 1,
-          'display_Name': 1
+          'displayName': 1
         })
 
         if user is None:
@@ -72,7 +72,7 @@ class LoginHandler(BaseHandler):
             return
             
         try:
-            decrypted_display_name = decrypt_display_name(user['display_Name', ''])   #decrupt display name
+            decrypted_display_name = decrypt_display_name(user.get('displayName', ''))   #decrupt display name
         except Exception:
             decrypted_display_name = '[decryption not successful]'
             
@@ -84,5 +84,3 @@ class LoginHandler(BaseHandler):
         self.response['displayName'] = decrypted_display_name
 
         self.write_json()
-
-   

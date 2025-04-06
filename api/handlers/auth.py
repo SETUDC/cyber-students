@@ -3,6 +3,7 @@ from time import mktime
 from tornado.gen import coroutine
 
 from .base import BaseHandler
+from .encrypt_decrypt import decrypt_display_name
 
 class AuthHandler(BaseHandler):
 
@@ -51,5 +52,5 @@ class AuthHandler(BaseHandler):
 
         self.current_user = {
             'email': user['email'],
-            'display_name': user['displayName']
+            'display_name': decrypted_display_name
         }
