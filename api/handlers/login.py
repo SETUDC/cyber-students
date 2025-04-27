@@ -3,16 +3,28 @@ from time import mktime
 from tornado.escape import json_decode, utf8
 from tornado.gen import coroutine
 from uuid import uuid4
-import bcrypt   # for hashing
 
 from .base import BaseHandler
-from .encrypt_decrypt import decrypt_display_name
 
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+
+# Helper: hash email
+def hash_email(email: str) -> str:
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(email.encode('utf-8'))
+    return digest.finalize().hex()
+
+# Helper: hash password
+def hash_password(password: str) -> str:
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(password.encode('utf-8'))
+    return digest.finalize().hex()
 
 class LoginHandler(BaseHandler):
 
     @coroutine
-    def generate_token(self, email):
+    def generate_token(self, hashed_email):
         token_uuid = uuid4().hex
         expires_in = datetime.now() + timedelta(hours=2)
         expires_in = mktime(expires_in.utctimetuple())
@@ -23,7 +35,7 @@ class LoginHandler(BaseHandler):
         }
 
         yield self.db.users.update_one({
-            'email': email
+            'email': hashed_email
         }, {
             '$set': token
         })
@@ -40,7 +52,7 @@ class LoginHandler(BaseHandler):
             password = body['password']
             if not isinstance(password, str):
                 raise Exception()
-        except Exception:
+        except:
             self.send_error(400, message='You must provide an email address and password!')
             return
 
@@ -52,35 +64,28 @@ class LoginHandler(BaseHandler):
             self.send_error(400, message='The password is invalid!')
             return
 
+        # Hash email and password
+        hashed_email = hash_email(email)
+        hashed_password_input = hash_password(password)
+
         user = yield self.db.users.find_one({
-          'email': email
+            'email': hashed_email
         }, {
-          'password': 1,
-          'displayName': 1
+            'password': 1
         })
 
         if user is None:
             self.send_error(403, message='The email address and password are invalid!')
             return
-            
-        if not user.get('password'):
+
+        if user['password'] != hashed_password_input:
             self.send_error(403, message='The email address and password are invalid!')
             return
-            
-        if not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-            self.send_error(403, message='The email address and password are invalid!')
-            return
-            
-        try:
-            decrypted_display_name = decrypt_display_name(user.get('displayName', ''))   #decrupt display name
-        except Exception:
-            decrypted_display_name = '[decryption not successful]'
-            
-        token = yield self.generate_token(email) 
+
+        token = yield self.generate_token(hashed_email)
 
         self.set_status(200)
         self.response['token'] = token['token']
         self.response['expiresIn'] = token['expiresIn']
-        self.response['displayName'] = decrypted_display_name
 
         self.write_json()
