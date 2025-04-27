@@ -10,10 +10,11 @@ import bcrypt
 
 from .base import BaseHandler
 from .encrypt_decrypt import encrypt_display_name
+from api.conf import AES_KEY
 
 AES_KEY = AESGCM.generate_key(bit_length=256) #generate AES key
 
-def encrypt_display_name(name: str, key:bytes) -> str:
+def encrypt_field(name: str, key:bytes) -> str:
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)
     ciphertext = aesgcm.encrypt(nonce, name.encode('utf-8'), None)
@@ -45,43 +46,30 @@ class RegistrationHandler(BaseHandler):
             if not isinstance(has_disability, bool):
                 raise Exception()
                 
-            encrypted_display_name = encrypt_display_name(display_name, AES_KEY)
+            #encrypted_display_name = encrypt_display_name(display_name, AES_KEY)
+            
+            encrypted_email = encrypt_field(email, AES_KEY)
+            encrypted_display_name = encrypt_field(display_name, AES_KEY)
+            encrypted_has_disability = encrypt_field(str(has_disability), AES_KEY)
             
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             
-        except Exception as e:
+        except Exception:
             self.send_error(400, message='You must provide an email address, password and display name!')
             return
-
-        if not email:
-            self.send_error(400, message='The email address is invalid!')
-            return
-
-        if not password:
-            self.send_error(400, message='The password is invalid!')
-            return
-
-        if not display_name:
-            self.send_error(400, message='The display name is invalid!')
-            return
             
-        if not has_disability:
-            self.send_error(400, message='Yes or No')
-            return
-
         user = yield self.db.users.find_one({
-          'email': email
-        }, {})
+            'email': encrypted_email}, {})
 
         if user is not None:
-            self.send_error(409, message='A user with the given email address already exists!')
+            self.send_error(409, message ='Auser with the given email already exists!')
             return
-
-        yield self.db.users.insert_one ({
-            'email': email,
-            'password': hashed_password,
-            'displayName': encrypted_display_name,
-            'hasDisability': has_disability
+            
+        yield self.db.users.insert_one({
+        'email': encrypted_email,
+        'password': hashed_password,
+        'displayName': encrypted_display_name,
+        'hasDisability': encrypted_has_disability
         })
 
         self.set_status(200)
@@ -89,5 +77,4 @@ class RegistrationHandler(BaseHandler):
         self.response['displayName'] = display_name
         self.response['hasDisability'] = has_disability
         
-
         self.write_json()
