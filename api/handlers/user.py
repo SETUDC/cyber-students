@@ -7,6 +7,7 @@ from tornado.gen import coroutine
 from api.conf import AES_KEY
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import base64
+import os
 
 def encrypt_field(value: str, key: bytes) -> str:
     aesgcm = AESGCM(key)

@@ -3,7 +3,7 @@ from time import mktime
 from tornado.gen import coroutine
 
 from .base import BaseHandler
-from .encrypt_decrypt import decrypt_display_name
+from .encrypt_decrypt_hash import decrypt_display_name
 
 class AuthHandler(BaseHandler):
 
