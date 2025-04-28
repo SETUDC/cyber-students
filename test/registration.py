@@ -12,29 +12,26 @@ import urllib.parse
 class RegistrationHandlerTest(BaseTest):
 
     @classmethod
-    def setUpClass(self):
-        self.my_app = Application([(r'/registration', RegistrationHandler)])
-        super().setUpClass()
-
-    def make_registration_body(self, email=None, password=None, display_name=None, phone_number=None, address=None, disability=None):
-        return {
-            'email': email or 'test@test.com',
-            'password': password or 'testPassword',
-            'displayName': display_name or 'testDisplayName',
-            'phoneNumber': phone_number or '123-456-7890',
-            'address': address or '123 Main Street',
-            'disability': disability or 'None'
-        }
+    def setUpClass(cls):
+        cls.my_app = Application([(r'/registration', RegistrationHandler)])
+        super(RegistrationHandlerTest, cls).setUpClass()
 
     def test_registration(self):
-        email = 'test@test.com'
-        password = 'testPassword'
-        display_name = 'testDisplayName'
+        email = 'test_new@test.com'
+        password = 'testPassword123'
+        display_name = 'TestDisplayName'
         phone_number = '123-456-7890'
-        address = '123 Main Street'
+        address = '456 Elm Street'
         disability = 'None'
 
-        body = self.make_registration_body(email, password, display_name, phone_number, address, disability)
+        body = {
+            'email': email,
+            'password': password,
+            'displayName': display_name,
+            'phoneNumber': phone_number,
+            'address': address,
+            'disability': disability
+        }
 
         response = self.fetch('/registration', method='POST', body=dumps(body))
         self.assertEqual(200, response.code)
@@ -47,23 +44,20 @@ class RegistrationHandlerTest(BaseTest):
         self.assertEqual(disability, body_2['disability'])
 
     def test_registration_without_display_name(self):
-        email = 'test@test.com'
-        password = 'testPassword'
-        phone_number = '123-456-7890'
-        address = '123 Main Street'
+        email = 'test_nodisplay@test.com'
+        password = 'anotherPassword456'
+        phone_number = '987-654-3210'
+        address = '789 Maple Avenue'
         disability = 'None'
 
-        body = self.make_registration_body(
-            email=email,
-            password=password,
-            display_name=None,  # omit display name
-            phone_number=phone_number,
-            address=address,
-            disability=disability
-        )
-
-        # Remove 'displayName' from the body explicitly
-        del body['displayName']
+        body = {
+            'email': email,
+            'password': password,
+            'phoneNumber': phone_number,
+            'address': address,
+            'disability': disability
+            # No 'displayName'
+        }
 
         response = self.fetch('/registration', method='POST', body=dumps(body))
         self.assertEqual(200, response.code)
@@ -76,10 +70,26 @@ class RegistrationHandlerTest(BaseTest):
         self.assertEqual(disability, body_2['disability'])
 
     def test_registration_twice(self):
-        body = self.make_registration_body()
+        email = 'test_twice@test.com'
+        password = 'repeatPassword789'
+        display_name = 'TestTwice'
+        phone_number = '111-222-3333'
+        address = '321 Oak Street'
+        disability = 'None'
 
+        body = {
+            'email': email,
+            'password': password,
+            'displayName': display_name,
+            'phoneNumber': phone_number,
+            'address': address,
+            'disability': disability
+        }
+
+        # First registration
         response = self.fetch('/registration', method='POST', body=dumps(body))
         self.assertEqual(200, response.code)
 
+        # Try registering same email again
         response_2 = self.fetch('/registration', method='POST', body=dumps(body))
-        self.assertEqual(409, response_2.code)
+        self.assertEqual(409, response_2.code)  # Conflict expected
