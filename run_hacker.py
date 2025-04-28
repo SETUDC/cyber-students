@@ -36,16 +36,26 @@ def get_users(db):
     })
     docs = yield cur.to_list(length=None)
     print('There are ' + str(len(docs)) + ' registered users:')
+    
     for doc in docs:
-        decrypted_doc = {
-            'email': decrypt_field(doc.get('email', '')),
-            'displayName': decrypt_field(doc.get('displayName', '')),
-            'phoneNumber': decrypt_field(doc.get('phoneNumber', '')),
-            'address': decrypt_field(doc.get('address', '')),
-            'disability': decrypt_field(doc.get('disability', '')),
-            #'password': doc.get('password', '(hashed)')
-        }
-        click.echo(decrypted_doc)
+    decrypted_doc = {}
+
+    # Decrypt only fields that were encrypted
+    if 'email' in doc:
+        decrypted_doc['email'] = decrypt_field(doc['email'])
+    if 'displayName' in doc:
+        decrypted_doc['displayName'] = decrypt_field(doc['displayName'])
+    if 'phoneNumber' in doc:
+        decrypted_doc['phoneNumber'] = decrypt_field(doc['phoneNumber'])
+    if 'address' in doc:
+        decrypted_doc['address'] = decrypt_field(doc['address'])
+    if 'disability' in doc:
+        decrypted_doc['disability'] = decrypt_field(doc['disability'])
+
+    # Password is hashed! Don't decrypt it
+    decrypted_doc['password'] = doc.get('password', '(missing)')
+
+    click.echo(decrypted_doc)
 
 @click.group()
 def cli():
