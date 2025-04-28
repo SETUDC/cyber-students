@@ -56,7 +56,7 @@ class RegistrationHandlerTest(BaseTest):
             'phoneNumber': phone_number,
             'address': address,
             'disability': disability
-            # No 'displayName'
+            
         }
 
         response = self.fetch('/registration', method='POST', body=dumps(body))
@@ -64,7 +64,7 @@ class RegistrationHandlerTest(BaseTest):
 
         body_2 = json_decode(response.body)
         self.assertEqual(email, body_2['email'])
-        self.assertEqual(email, body_2['displayName'])  # Should fallback to email
+        self.assertEqual(email, body_2['displayName']) 
         self.assertEqual(phone_number, body_2['phoneNumber'])
         self.assertEqual(address, body_2['address'])
         self.assertEqual(disability, body_2['disability'])
@@ -85,11 +85,9 @@ class RegistrationHandlerTest(BaseTest):
             'address': address,
             'disability': disability
         }
-
-        # First registration
+        
         response = self.fetch('/registration', method='POST', body=dumps(body))
         self.assertEqual(200, response.code)
 
-        # Try registering same email again
         response_2 = self.fetch('/registration', method='POST', body=dumps(body))
         self.assertEqual(409, response_2.code)  # Conflict expected

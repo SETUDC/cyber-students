@@ -8,7 +8,6 @@ import base64
 
 from api.conf import AES_KEY
 
-# Prepare AES key
 key_bytes = bytes(AES_KEY, "utf-8")
 
 def decrypt_field(hex_data: str) -> str:

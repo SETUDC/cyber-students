@@ -20,7 +20,6 @@ class UserHandlerTest(BaseTest):
 
     @coroutine
     def register(self):
-        # Insert user already encrypted and hashed
         encrypted_email = self.encrypt_field(self.email)
         encrypted_display_name = self.encrypt_field(self.display_name)
         encrypted_phone_number = self.encrypt_field(self.phone_number)

@@ -11,7 +11,6 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from .base import BaseHandler
 from api.conf import AES_KEY
 
-# Prepare AES key
 key_bytes = bytes(AES_KEY, "utf-8")
 
 def encrypt_field(plaintext: str) -> str:
@@ -23,7 +22,6 @@ def encrypt_field(plaintext: str) -> str:
     plaintext_bytes = plaintext.encode('utf-8')
     ciphertext_bytes = encryptor.update(plaintext_bytes)
 
-    # Combine nonce + ciphertext, encode as hex
     combined = nonce_bytes + ciphertext_bytes
     return combined.hex()
 
@@ -79,14 +77,12 @@ class RegistrationHandler(BaseHandler):
         encrypted_disability = encrypt_field(disability)
         hashed_password = hash_password(password)
 
-        # Check if user already exists
         user = yield self.db.users.find_one({'email': encrypted_email}, {})
 
         if user is not None:
             self.send_error(409, message='A user with the given email address already exists!')
             return
 
-        # Insert into database
         yield self.db.users.insert_one({
             'email': encrypted_email,
             'password': hashed_password,

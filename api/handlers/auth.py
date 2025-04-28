@@ -3,7 +3,25 @@ from time import mktime
 from tornado.gen import coroutine
 
 from .base import BaseHandler
-from .encrypt_decrypt_hash import decrypt_display_name
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import base64
+
+from api.conf import AES_KEY
+
+key_bytes = bytes(AES_KEY, "utf-8")
+
+def decrypt_field(hex_data: str) -> str:
+    if not hex_data:
+        return ''
+    combined = bytes.fromhex(hex_data)
+    nonce_bytes = combined[:16]
+    ciphertext_bytes = combined[16:]
+
+    cipher = Cipher(algorithms.AES(key_bytes), modes.CTR(nonce_bytes))
+    decryptor = cipher.decryptor()
+    plaintext_bytes = decryptor.update(ciphertext_bytes)
+    return plaintext_bytes.decode('utf-8')
 
 class AuthHandler(BaseHandler):
 
@@ -17,8 +35,7 @@ class AuthHandler(BaseHandler):
         try:
             token = self.request.headers.get('X-Token')
             if not token:
-              raise Exception()
-              
+                raise Exception()
         except:
             self.current_user = None
             self.send_error(400, message='You must provide a token!')
@@ -42,15 +59,11 @@ class AuthHandler(BaseHandler):
             self.current_user = None
             self.send_error(403, message='Your token has expired!')
             return
-            
-        try:
-            decrypted_display_name = decrypt_display_name(user['displayName'])
-        except Exception:
-            self.current_user = None
-            self.send_error(500, message='Could not decrypt display name!')
-            return
+
+        decrypted_email = decrypt_field(user['email'])
+        decrypted_display_name = decrypt_field(user['displayName'])
 
         self.current_user = {
-            'email': user['email'],
+            'email': decrypted_email,
             'display_name': decrypted_display_name
         }
