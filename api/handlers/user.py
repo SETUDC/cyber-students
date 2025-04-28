@@ -36,7 +36,6 @@ class UserHandler(AuthHandler):
     @coroutine
     
     def get(self):
-<<<<<<< HEAD
         self.set_status(200)
         self.response['email'] = decrypt_field(self.current_user['email'])
         self.response['displayName'] = decrypt_field(self.current_user['displayName'])
@@ -44,7 +43,7 @@ class UserHandler(AuthHandler):
         self.response['address'] = decrypt_field(self.current_user.get('address', ''))
         self.response['disability'] = self.current_user.get('disability', '')
         self.write_json()
-=======
+
         token = self.get_secure_cookie('token')
         if not token:
             self.send_error(401, message='Unauthorized')
@@ -76,4 +75,3 @@ class UserHandler(AuthHandler):
     def post(self):
         try:
             body = json_decode(self.request.body)
-
