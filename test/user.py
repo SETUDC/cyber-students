@@ -11,6 +11,33 @@ from .base import BaseTest
 
 import urllib.parse
 
+# Crypto imports
+from api.conf import AES_KEY
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import hashes
+import os
+
+key_bytes = bytes(AES_KEY, "utf-8")
+
+def encrypt_field(plaintext: str) -> str:
+    if not plaintext:
+        return ''
+    nonce = os.urandom(16)
+    aes_ctr_cipher = Cipher(algorithms.AES(key_bytes), mode=modes.CTR(nonce))
+    aes_ctr_encryptor = aes_ctr_cipher.encryptor()
+
+    plaintext_bytes = bytes(plaintext, "utf-8")
+    ciphertext_bytes = aes_ctr_encryptor.update(plaintext_bytes)
+
+    combined = nonce + ciphertext_bytes
+    return combined.hex()
+
+def hash_password(password: str) -> str:
+    digest = hashes.Hash(hashes.SHA256())
+    digest.update(password.encode('utf-8'))
+    hashed = digest.finalize()
+    return hashed.hex()
+
 class UserHandlerTest(BaseTest):
 
     @classmethod
