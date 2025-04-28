@@ -7,4 +7,6 @@ MONGODB_HOST = {
 
 MONGODB_DBNAME = 'cyberStudentsTest'
 
+COOKIE_SECRET = "super-strong-random-secret-key"
+
 WORKERS = 1
