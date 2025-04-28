@@ -10,6 +10,9 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 # Prepare AES key
 key_bytes = AES_KEY
 
+# Use AES_KEY directly
+key_bytes = AES_KEY
+
 def decrypt_field(hex_data: str) -> str:
     if not hex_data:
         return ''
@@ -40,7 +43,7 @@ def get_users(db):
             'phoneNumber': decrypt_field(doc.get('phoneNumber', '')),
             'address': decrypt_field(doc.get('address', '')),
             'disability': decrypt_field(doc.get('disability', '')),
-            'password': doc.get('password', '(hashed)')  # SHA-256 hash (no decryption)
+            'password': doc.get('password', '(hashed)')
         }
         click.echo(decrypted_doc)
 
