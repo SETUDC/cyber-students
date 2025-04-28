@@ -18,7 +18,7 @@ def get_users(db):
     docs = yield cur.to_list(length=None)
     print('There are ' + str(len(docs)) + ' registered users:')
     for doc in docs:
-        click.echo(doc)  # Just print raw document as-is
+        click.echo(doc) 
 
 @click.group()
 def cli():
