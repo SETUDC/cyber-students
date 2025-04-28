@@ -8,18 +8,19 @@ import base64
 
 from api.conf import AES_KEY
 
+# Prepare AES key
 key_bytes = bytes(AES_KEY, "utf-8")
 
-def decrypt_field(encoded_text: str) -> str:
-    if not encoded_text:
+def decrypt_field(hex_data: str) -> str:
+    if not hex_data:
         return ''
-    raw = base64.b64decode(encoded_text)
-    nonce = raw[:16]
-    ciphertext = raw[16:]
-    cipher = Cipher(algorithms.AES(key_bytes), modes.CTR(nonce))
-    decryptor = cipher.decryptor()
+    combined = bytes.fromhex(hex_data)
+    nonce_bytes = combined[:16]
+    ciphertext_bytes = combined[16:]
 
-    plaintext_bytes = decryptor.update(ciphertext)
+    cipher = Cipher(algorithms.AES(key_bytes), modes.CTR(nonce_bytes))
+    decryptor = cipher.decryptor()
+    plaintext_bytes = decryptor.update(ciphertext_bytes)
     return plaintext_bytes.decode('utf-8')
 
 class UserHandler(AuthHandler):
@@ -27,20 +28,14 @@ class UserHandler(AuthHandler):
     @authenticated
     @coroutine
     def get(self):
-        # Decrypt user fields
-        decrypted_email = decrypt_field(self.current_user['email'])
-        decrypted_display_name = decrypt_field(self.current_user['displayName'])
-        decrypted_phone_number = decrypt_field(self.current_user.get('phoneNumber', ''))
-        decrypted_address = decrypt_field(self.current_user.get('address', ''))
-        disability = self.current_user.get('disability', '')  # disability is stored plaintext
-
-        # Build and send the response
         self.set_status(200)
+
         self.response.update({
-            'email': decrypted_email,
-            'displayName': decrypted_display_name,
-            'phoneNumber': decrypted_phone_number,
-            'address': decrypted_address,
-            'disability': disability,
+            'email': decrypt_field(self.current_user['email']),
+            'displayName': decrypt_field(self.current_user['displayName']),
+            'phoneNumber': decrypt_field(self.current_user.get('phoneNumber', '')),
+            'address': decrypt_field(self.current_user.get('address', '')),
+            'disability': decrypt_field(self.current_user.get('disability', ''))  # Decrypt disability too
         })
+
         self.write_json()
