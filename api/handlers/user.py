@@ -1,7 +1,6 @@
 from tornado.web import authenticated
 from .auth import AuthHandler
 
-<<<<<<< HEAD
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import base64
 
@@ -24,31 +23,6 @@ def decrypt_field(encoded_text: str) -> str:
     plaintext_bytes = decryptor.update(ciphertext)
     return plaintext_bytes.decode('utf-8')
 
-=======
-from tornado.escape import json_decode
-from tornado.gen import coroutine
-#from .encrypt_decrypt import encrypt_display_name
-from api.conf import AES_KEY
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-import base64
-import os
-
-def encrypt_field(value: str, key: bytes) -> str:
-    aesgcm = AESGCM(key)
-    nonce = os.urandom(12)
-    ciphertext = aesgcm.encrypt(nonce, value.encode('utf-8'), None)
-    return base64.b64encode(nonce + ciphertext).decode('utf-8')
-    
-def decrypt_field(ciphertext_b64: str, key: bytes) -> str:
-    aesgcm = AESGCM(key)
-    data = base64.b64decode(ciphertext_b64.encode('utf-8'))
-    nonce = data[:12]
-    ciphertext = data[12:]
-    plaintext = aesgcm.decrypt(nonce, ciphertext, None)
-    return plaintext.decode('utf-8')
-
-
->>>>>>> 2a96aa0b95a23bd57c8c910ff67ee918bad095b5
 class UserHandler(AuthHandler):
 
    # @authenticated
@@ -102,4 +76,4 @@ class UserHandler(AuthHandler):
     def post(self):
         try:
             body = json_decode(self.request.body)
->>>>>>> 2a96aa0b95a23bd57c8c910ff67ee918bad095b5
+
