@@ -8,7 +8,8 @@ import base64
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from .base import BaseHandler
+#from .base import BaseHandler
+from api.handlers.base import BaseHandler
 from api.conf import AES_KEY
 
 key_bytes = bytes(AES_KEY, "utf-8")
