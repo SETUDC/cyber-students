@@ -8,18 +8,18 @@ from api.conf import MONGODB_HOST, MONGODB_DBNAME
 
 @coroutine
 def get_users(db):
-  cur = db.users.find({}, {
-    'email': 1,
-    'password': 1,
-    'displayName': 1,
-    'phoneNumber': 1,
-    'address': 1,
-    'disability': 1,
-  })
-  docs = yield cur.to_list(length=None)
-  print('There are ' + str(len(docs)) + ' registered users:')
-  for doc in docs:
-    click.echo(doc)
+    cur = db.users.find({}, {
+        'email': 1,
+        'password': 1,
+        'displayName': 1,
+        'phoneNumber': 1,
+        'address': 1,
+        'disability': 1,
+    })
+    docs = yield cur.to_list(length=None)
+    print('There are ' + str(len(docs)) + ' registered users:')
+    for doc in docs:
+        click.echo(doc)
 
 @click.group()
 def cli():
