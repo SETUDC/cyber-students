@@ -43,7 +43,7 @@ def get_users(db):
             'phoneNumber': decrypt_field(doc.get('phoneNumber', '')),
             'address': decrypt_field(doc.get('address', '')),
             'disability': decrypt_field(doc.get('disability', '')),
-            'password': doc.get('password', '(hashed)')
+            #'password': doc.get('password', '(hashed)')
         }
         click.echo(decrypted_doc)
 
