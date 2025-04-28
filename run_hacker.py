@@ -8,7 +8,7 @@ from api.conf import MONGODB_HOST, MONGODB_DBNAME, AES_KEY
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 # Prepare AES key
-key_bytes = bytes(AES_KEY, "utf-8")
+key_bytes = AES_KEY
 
 def decrypt_field(hex_data: str) -> str:
     if not hex_data:
