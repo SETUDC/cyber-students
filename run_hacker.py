@@ -38,7 +38,7 @@ def get_users(db):
     print('There are ' + str(len(docs)) + ' registered users:')
     
     for doc in docs:
-    decrypted_doc = {}
+        decrypted_doc = {}
 
     # Decrypt only fields that were encrypted
     if 'email' in doc:
